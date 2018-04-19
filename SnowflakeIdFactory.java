@@ -1,6 +1,33 @@
-@ToString  
-@Slf4j  
+/**
+ * Filename SnowflakeIdFactory.java Create on 2018年4月19日 Copyright 2018 YUANRONGHUA
+ * All Rights Reserved.
+ */
+package yuanronghua.test;
+
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Map;
+import java.util.Set;
+import java.util.concurrent.CountDownLatch;
+
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
+import lombok.ToString;
+
+/**
+ * Description:
+ * 
+ * @author <a href="mailto:yuanronghua">yuanronghua</a>
+ * @version 1.0
+ * @since JDK 1.7 Created on 2018年4月19日 下午1:53:00
+ */
+@ToString 
 public class SnowflakeIdFactory {  
+	
+    private static final Logger log = LoggerFactory.getLogger(SnowflakeIdFactory.class);  
   
     private final long twepoch = 1288834974657L;  
     private final long workerIdBits = 5L;  
@@ -64,17 +91,18 @@ public class SnowflakeIdFactory {
         return System.currentTimeMillis();  
     }  
   
-    public static void testProductIdByMoreThread(int dataCenterId, int workerId, int n) throws InterruptedException {  
+    public static void testProductIdByMoreThread(int dataCenterId, int workerId, final int n) throws InterruptedException {  
         List<Thread> tlist = new ArrayList<>();  
-        Set<Long> setAll = new HashSet<>();  
-        CountDownLatch cdLatch = new CountDownLatch(10);  
+        final Set<Long> setAll = new HashSet<>();  
+        final CountDownLatch cdLatch = new CountDownLatch(10);  
         long start = System.currentTimeMillis();  
         int threadNo = dataCenterId;  
-        Map<String,SnowflakeIdFactory> idFactories = new HashMap<>();  
+        final Map<String,SnowflakeIdFactory> idFactories = new HashMap<>();  
         for(int i=0;i<10;i++){  
             //用线程名称做map key.  
             idFactories.put("snowflake"+i,new SnowflakeIdFactory(workerId, threadNo++));  
-        }  
+        } 
+        
         for(int i=0;i<10;i++){  
             Thread temp =new Thread(new Runnable() {  
                 @Override  
@@ -99,9 +127,7 @@ public class SnowflakeIdFactory {
         cdLatch.await();  
   
         long end1 = System.currentTimeMillis() - start;  
-  
         log.info("共耗时:{}毫秒,预期应该生产{}个id, 实际合并总计生成ID个数:{}",end1,10*n,setAll.size());  
-  
     }  
   
     public static void testProductId(int dataCenterId, int workerId, int n){  
